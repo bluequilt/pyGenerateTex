@@ -1,0 +1,23 @@
+\documentclass[UTF8]{ctexart}
+%公式用
+\usepackage{amsmath}
+\usepackage{amssymb}
+% 列表
+\usepackage{iitem}
+% \degree
+\usepackage{gensymb}
+\usepackage{graphicx}
+% 页面
+\usepackage[a4paper,left=1.91cm,right=1.91cm,top=2.54cm,bottom=2.54cm]{geometry}
+% 标题样式
+\CTEXsetup[format+={\zihao{3}}]{section}
+\CTEXsetup[format+={\zihao{-3}}]{subsection}
+% 快捷
+\newenvironment{ltcequation}{\begin{equation}\left\lbrace\begin{aligned}}{\end{aligned}\right.\end{equation}}
+\numberwithin{equation}{section}
+% 开始
+\input{structFuncs.tex}
+\begin{document}
+\zihao{-4}
+\input{textfill.tex}
+\end{document}
