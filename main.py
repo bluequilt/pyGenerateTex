@@ -1,4 +1,5 @@
 import subprocess
+from os import system
 
 
 def node_join(command, *para_arr):
@@ -8,7 +9,7 @@ def node_join(command, *para_arr):
 
 
 def generate():
-    with open("textfill.txt", "w", encoding="utf-8") as f:
+    with open("textfill.tex", "w", encoding="utf-8") as f:
         for item in (
             {
                 "title": "OP10",
@@ -31,17 +32,17 @@ def generate():
             f.write(node_join(r"\structTable", item["title"], word_node, pic_node,))
 
 
-def main():
+def main(clear_tmp=False):
     generate()
-    compile_command = (
-        "latexmk -pdf -file-line-error -halt-on-error -interaction=nonstopmode"
-    )
+    compile_command = "latexmk -pdf -file-line-error -halt-on-error -interaction=nonstopmode test1.tex"
     compile_process = subprocess.Popen(
-        compile_command, shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE,
+        compile_command, shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE
     )
     # 编译期间可以干点别的事
     print("证明异步运行！！！")
     compile_process.wait()
+    if clear_tmp:
+        system("latexmk -c")
 
 
 main()
