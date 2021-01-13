@@ -1,27 +1,20 @@
-import jinja2
-from pathlib import Path
 import subprocess
 from os import system
+from myenv import *
+from json import load as load_json
 
-latex_jinja_env = jinja2.Environment(
-    block_start_string="\BLOCK{",
-    block_end_string="}",
-    variable_start_string="\VAR{",
-    variable_end_string="}",
-    comment_start_string="\#{",
-    comment_end_string="}",
-    line_statement_prefix="%%",
-    line_comment_prefix="%#",
-    trim_blocks=True,
-    autoescape=False,
-    loader=jinja2.FileSystemLoader(Path(".").absolute()),
-)
 template = latex_jinja_env.get_template("template.tex")
 
 
 def generate():
+    with open("geometry.json", "r", encoding="utf-8") as geometry_f:
+        geometry_settings = load_json(geometry_f)
+    geo = Geometry(geometry_settings)
+    with open("db.json", "r", encoding="utf-8") as db_f:
+        db_dict = load_json(db_f)
+    db_dict["geometry"] = geo
     with open("pygtex.tex", "w", encoding="utf-8") as f:
-        f.write(template.render({"section1": "Long Form", "section2": "Short Form"}))
+        f.write(template.render(db_dict))
 
 
 def main(topdf=False, clear_tmp=False):
@@ -38,4 +31,4 @@ def main(topdf=False, clear_tmp=False):
             system("latexmk -c")
 
 
-main()
+main(True)

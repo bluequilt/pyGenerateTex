@@ -1,22 +1,60 @@
 \documentclass[UTF8]{ctexart}
-\newcommand{\BLOCK}[1]{块语句#1}
-\newcommand{\VAR}[1]{变量#1}
+\usepackage{boxedminipage}
+\usepackage[\VAR{geometry.header}]{geometry}
+%\usepackage{setspace}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+%==============================
+\renewcommand{\figureautorefname}{图}
+%\setstretch{1}
+\setenumerate[1]{partopsep=0mm,parsep=\parskip,topsep=0mm}
+%==============================
+\newcommand{\smalltitle}[1]{{\zihao{4}\bfseries{#1}}\\} 
+%==============================
 \begin{document}
-\section{Example}
-An example document using \LaTeX, Python, and Jinja.
-% This is a regular LaTeX comment
-\section{\VAR{section1}}
-\#{This is a long-form Jinja comment}
-\begin{itemize}
-    \BLOCK{ for x in range(0, 3) }
-    \item Counting: \VAR{x}
-          \BLOCK{ endfor }
-\end{itemize}
-\section{\VAR{section2}}
-%# This is a short-form Jinja comment
-\begin{itemize}
-    %% for x in range(0, 3)
-    \item Counting: \VAR{x}
-          %% endfor
-\end{itemize}
+\zihao{5}
+
+\centering
+%==============================
+\begin{boxedminipage}{\VAR{geometry.textwidth|round(2)}mm}
+\centering
+\smalltitle{开班准备描述}
+\begin{boxedminipage}[t]{\VAR{geometry.intro_width|round(2)}mm}
+\begin{enumerate}
+\BLOCK{for i in 开班准备描述}
+\item \VAR{i}
+\BLOCK{endfor}
+\end{enumerate}
+\end{boxedminipage}
+\hfill
+\begin{boxedminipage}[t]{\VAR{geometry.picbox_width|round(2)}mm}
+\begin{figure}[H]
+\parbox[t]{\VAR{geometry.picbox_half_width|round(2)}mm}{
+\includegraphics[width=\VAR{geometry.picbox_half_width|round(2)}mm]{pic01}
+\caption{}\label{afrg}}
+\hfill
+\parbox[t]{\VAR{geometry.picbox_half_width|round(2)}mm}{
+\includegraphics[width=\VAR{geometry.picbox_half_width|round(2)}mm]{pic02}
+\caption{}}
+\end{figure}
+\end{boxedminipage}
+\end{boxedminipage}
+\begin{boxedminipage}{\VAR{geometry.textwidth|round(2)}mm}
+\centering
+\smalltitle{设备开机描述}
+\begin{boxedminipage}[t]{\VAR{geometry.intro_width|round(2)}mm}
+\begin{enumerate}
+\BLOCK{for i in 设备开机描述}
+\item \VAR{i}
+\BLOCK{endfor}
+\end{enumerate}
+\end{boxedminipage}
+\hfill
+\begin{boxedminipage}[t]{\VAR{geometry.picbox_width|round(2)}mm}
+图片2
+\end{boxedminipage}
+\end{boxedminipage}
+\autoref{afrg}
 \end{document}
