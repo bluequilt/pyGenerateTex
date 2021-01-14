@@ -1,6 +1,6 @@
 import jinja2
 from pathlib import Path
-
+import re
 
 latex_jinja_env = jinja2.Environment(
     block_start_string="\BLOCK{",
@@ -20,18 +20,13 @@ latex_jinja_env = jinja2.Environment(
 # latex_jinja_env.filters["keyvalue"] = latex_kv
 
 
-class LTCEnv(object):
-    def __init__(self, initial=None, manual=None):
-        tempvar = {}
-        tempvar.update(initial or {})
-        tempvar.update(manual or {})
-        for attr, value in tempvar.items():
-            setattr(self, attr, value)
-
-
-class Geometry(LTCEnv):
+class Geometry(object):
     """默认单位为毫米
 变量名参考：书P143-144"""
+
+    def __init__(self, initial):
+        for attr, value in initial.items():
+            setattr(self, attr, value)
 
     @property
     def textwidth(self):
@@ -60,4 +55,42 @@ class Geometry(LTCEnv):
     @property
     def picbox_half_width(self):
         return self.picbox_width / 2 - 2
+
+
+class TableEnv(object):
+    def __init__(self, col_lens, initial):
+        """initial: 必须要有tabcolsep和tablewidth
+col_lens: ("10mm",2,3)
+带长度的项必须显式写出mm，不参与自动扩张大小
+参与自动扩张的项必须是数值型"""
+        for attr, value in initial.items():
+            setattr(self, attr, value)
+        # ========计算单元格宽度========
+        total_len = self.tablewidth
+        # self.col_lens存的都是绝对长度，col_lens是混杂的原始输入
+        self.col_lens = [0] * len(col_lens)
+        # 首先把col_lens中的固定长度存储到self.col_lens中
+        for index, item in enumerate(
+            filter(lambda abc: isinstance(abc, str), col_lens)
+        ):
+            fixed_len = float(re.search(r"(\d+(\.\d+)?)mm", item).group(1))
+            total_len -= fixed_len
+            self.col_lens[index] = fixed_len
+        # 得到所有浮动单元格的相对长度的总和
+        flex_unit = sum(filter(lambda item: not isinstance(item, str), col_lens))
+        # 计算所有浮动单元格的绝对长度
+        self.col_lens = tuple(
+            (item if item > 0 else (col_lens[index] / flex_unit) * total_len)
+            for (index, item) in enumerate(self.col_lens)
+        )
+        # 如果一开始每个单元格的宽度都是固定的，则校准总宽度
+        self.tablewidth = sum(self.col_lens) if flex_unit == 0 else self.tablewidth
+        # 最后！！！每个单元格减去边距宽度
+        self.col_lens = tuple(i - 2 * self.tabcolsep for i in self.col_lens)
+
+    def fullwidth(self, index):
+        return self.col_lens[index - 1]
+
+    def innerwidth(self, index):
+        return self.col_lens[index - 1] - 2 * self.tabcolsep
 

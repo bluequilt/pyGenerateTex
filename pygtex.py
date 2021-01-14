@@ -10,11 +10,18 @@ def generate():
     with open("geometry.json", "r", encoding="utf-8") as geometry_f:
         geometry_settings = load_json(geometry_f)
     geo = Geometry(geometry_settings)
+    #========ddd========
+    tableenv = TableEnv((3, 3, 3, 3, 4), {"tabcolsep": 1, "tablewidth": geo.textwidth-2})
+    #========ddd========
     with open("db.json", "r", encoding="utf-8") as db_f:
         db_dict = load_json(db_f)
-    db_dict["geometry"] = geo
+    #========ddd========
+    render_dict={}
+    render_dict["geometry"]=geo
+    render_dict["htable"]=tableenv
+    render_dict.update(db_dict)
     with open("pygtex.tex", "w", encoding="utf-8") as f:
-        f.write(template.render(db_dict))
+        f.write(template.render(render_dict))
 
 
 def main(topdf=False, clear_tmp=False):
@@ -31,4 +38,4 @@ def main(topdf=False, clear_tmp=False):
             system("latexmk -c")
 
 
-main(True)
+main()
