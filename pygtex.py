@@ -5,13 +5,13 @@ from json import load as load_json
 
 template = latex_jinja_env.get_template("template.tex")
 
-
+qwerty="B01"
 def generate():
     with open("geometry.json", "r", encoding="utf-8") as geometry_f:
         geometry_settings = load_json(geometry_f)
     geo = Geometry(geometry_settings)
     #========ddd========
-    tableenv = TableEnv((3, 3, 3, 3, 4), {"tabcolsep": 1, "tablewidth": geo.textwidth-2})
+    tableenv = TableEnv((3, 3, 3, 3, 4), {"tabcolsep": 1, "tablewidth": geo.textwidth})
     #========ddd========
     with open("db.json", "r", encoding="utf-8") as db_f:
         db_dict = load_json(db_f)
@@ -19,6 +19,7 @@ def generate():
     render_dict={}
     render_dict["geometry"]=geo
     render_dict["htable"]=tableenv
+    render_dict["qwerty"]=qwerty
     render_dict.update(db_dict)
     with open("pygtex.tex", "w", encoding="utf-8") as f:
         f.write(template.render(render_dict))

@@ -1,6 +1,7 @@
 import jinja2
 from pathlib import Path
 import re
+from pylatex.utils import NoEscape, escape_latex
 
 latex_jinja_env = jinja2.Environment(
     block_start_string="\BLOCK{",
@@ -57,6 +58,26 @@ class Geometry(object):
         return self.picbox_width / 2 - 2
 
 
+def valign_words(content, align):
+    return {
+        "b": "\\rule{0mm}{\\fill}\\\\" + content,
+        "t": content + "\\\\\\rule{0mm}{\\fill}",
+        "c": content,
+    }[align]
+
+
+def halign_words(content, align, single_row):
+    content = (
+        "".join(("\\smallskip ", content, "\\smallskip")) if single_row else content
+    )
+    return {
+        "r": "\\raggedleft " + content,
+        "c": "\\centering " + content,
+        "l": "\\raggedright " + content,
+        "j": content,
+    }[align]
+
+
 class TableEnv(object):
     def __init__(self, col_lens, initial):
         """initial: 必须要有tabcolsep和tablewidth
@@ -85,12 +106,78 @@ col_lens: ("10mm",2,3)
         )
         # 如果一开始每个单元格的宽度都是固定的，则校准总宽度
         self.tablewidth = sum(self.col_lens) if flex_unit == 0 else self.tablewidth
-        # 最后！！！每个单元格减去边距宽度
-        self.col_lens = tuple(i - 2 * self.tabcolsep for i in self.col_lens)
 
     def fullwidth(self, index):
+        # 模板内手写列号从1开始
         return self.col_lens[index - 1]
 
     def innerwidth(self, index):
+        # 模板内手写列号从1开始
         return self.col_lens[index - 1] - 2 * self.tabcolsep
+
+    def _multicol_width(self, cols):
+        "cols是有两个值的元组"
+        return sum(self.innerwidth(i) for i in range(cols[0], cols[1] + 1))
+
+    def cell(self, content, col, halign="c", valign="c"):
+        content = halign_words(valign_words(content, valign), halign, True)
+        return "".join(
+            (
+                "\\parbox[c][][s]{",
+                str(round(self.innerwidth(col), 2)),
+                "mm}{",
+                content,
+                "}",
+            )
+        )
+
+    def mc(self, content, cols, halign="c", valign="c"):
+        "cols是有两个值的元组，开始列号和结束列号"
+        content = halign_words(valign_words(content, valign), halign, True)
+        return "".join(
+            (
+                "\\multicolumn{",
+                str(cols[1] - cols[0] + 1),
+                "}{|c|}{\\parbox[c][][s]{",
+                str(round(self._multicol_width(cols), 2)),
+                "mm}{",
+                content,
+                "} }",
+            )
+        )
+
+    def mcrb(self, cols):
+        "multi_column_row_blank，用于多行多列合并的非首行"
+        return "".join(("\multicolumn{", str(cols[1] - cols[0] + 1), "}{|c|}{}"))
+
+    def mcr(self, content, cols, row_count, halign="c", valign="c"):
+        """cols是有两个值的元组，开始列号和结束列号
+halign: t, c, b
+valign: l, c, r, j"""
+        content = halign_words(valign_words(content, valign), halign, False)
+        return "".join(
+            (
+                "\\multicolumn{",str(cols[1] - cols[0] + 1),"}{|c|}{\\multirow{",
+                str(row_count),
+                "}*{\\parbox[c][][s]{",
+                str(round(self._multicol_width(cols), 2)),
+                "mm}{",
+                content,
+                "} } }",
+            )
+        )
+
+    def mr(self, content, col, row_count, halign="c", valign="c"):
+        content = halign_words(valign_words(content, valign), halign, False)
+        return "".join(
+            (
+                "\multirow{",
+                str(row_count),
+                "}*{\\parbox[c][][s]{",
+                str(round(self.innerwidth(col), 2)),
+                "mm}{",
+                content,
+                "} }",
+            )
+        )
 
