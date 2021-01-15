@@ -1,7 +1,6 @@
 import jinja2
 from pathlib import Path
 import re
-from pylatex.utils import NoEscape, escape_latex
 
 latex_jinja_env = jinja2.Environment(
     block_start_string="\BLOCK{",
@@ -16,9 +15,6 @@ latex_jinja_env = jinja2.Environment(
     autoescape=False,
     loader=jinja2.FileSystemLoader(Path(".").absolute()),
 )
-# def latex_kv(obj, attr, precision=2):
-#     return f"{attr}={round(getattr(obj, attr), precision)}"
-# latex_jinja_env.filters["keyvalue"] = latex_kv
 
 
 class Geometry(object):
@@ -79,11 +75,9 @@ def halign_words(content, align, single_row):
 
 
 class TableEnv(object):
-    def __init__(self, col_lens, initial):
-        """initial: 必须要有tabcolsep和tablewidth
-col_lens: ("10mm",2,3)
-带长度的项必须显式写出mm，不参与自动扩张大小
-参与自动扩张的项必须是数值型"""
+    def __init__(self, initial):
+        col_lens = initial["col_lens"]
+        initial.pop("col_lens")
         for attr, value in initial.items():
             setattr(self, attr, value)
         # ========计算单元格宽度========
@@ -157,7 +151,9 @@ valign: l, c, r, j"""
         content = halign_words(valign_words(content, valign), halign, False)
         return "".join(
             (
-                "\\multicolumn{",str(cols[1] - cols[0] + 1),"}{|c|}{\\multirow{",
+                "\\multicolumn{",
+                str(cols[1] - cols[0] + 1),
+                "}{|c|}{\\multirow{",
                 str(row_count),
                 "}*{\\parbox[c][][s]{",
                 str(round(self._multicol_width(cols), 2)),
