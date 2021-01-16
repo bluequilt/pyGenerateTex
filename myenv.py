@@ -17,6 +17,12 @@ latex_jinja_env = jinja2.Environment(
 )
 
 
+def add_style(content, styles):
+    if styles["bf"]:
+        return "\\textbf{%s}" % (content,)
+    return content
+
+
 class Geometry(object):
     """默认单位为毫米
 变量名参考：书P143-144"""
@@ -74,6 +80,12 @@ def halign_words(content, align, single_row):
     }[align]
 
 
+def add_table_style(content, styles, single_row):
+    content = add_style(content, styles)
+    content = valign_words(content, styles["v"])
+    return halign_words(content, styles["h"], single_row)
+
+
 class TableEnv(object):
     def __init__(self, initial):
         col_lens = initial["col_lens"]
@@ -113,67 +125,47 @@ class TableEnv(object):
         "cols是有两个值的元组"
         return sum(self.innerwidth(i) for i in range(cols[0], cols[1] + 1))
 
-    def cell(self, content, col, halign="c", valign="c"):
-        content = halign_words(valign_words(content, valign), halign, True)
-        return "".join(
-            (
-                "\\parbox[c][][s]{",
-                str(round(self.innerwidth(col), 2)),
-                "mm}{",
-                content,
-                "}",
-            )
+    def cell(self, content, col, **styles):
+        curstyles = self.default_style.copy()
+        curstyles.update(styles)
+        return "\\parbox[c][][s]{%smm}{%s}" % (
+            round(self.innerwidth(col), 2),
+            add_table_style(content, curstyles, True),
         )
 
-    def mc(self, content, cols, halign="c", valign="c"):
+    def mc(self, content, cols, **styles):
         "cols是有两个值的元组，开始列号和结束列号"
-        content = halign_words(valign_words(content, valign), halign, True)
-        return "".join(
-            (
-                "\\multicolumn{",
-                str(cols[1] - cols[0] + 1),
-                "}{|c|}{\\parbox[c][][s]{",
-                str(round(self._multicol_width(cols), 2)),
-                "mm}{",
-                content,
-                "} }",
-            )
+        curstyles = self.default_style.copy()
+        curstyles.update(styles)
+        return "\multicolumn{%d}{|c|}{\parbox[c][][c]{%smm}{%s}}" % (
+            cols[1] - cols[0] + 1,
+            round(self._multicol_width(cols), 2),
+            add_table_style(content, curstyles, True),
         )
 
     def mcrb(self, cols):
         "multi_column_row_blank，用于多行多列合并的非首行"
-        return "".join(("\multicolumn{", str(cols[1] - cols[0] + 1), "}{|c|}{}"))
+        return "\multicolumn{%d}{|c|}{}" % (cols[1] - cols[0] + 1,)
 
-    def mcr(self, content, cols, row_count, halign="c", valign="c"):
+    def mcr(self, content, cols, row_count, **styles):
         """cols是有两个值的元组，开始列号和结束列号
 halign: t, c, b
 valign: l, c, r, j"""
-        content = halign_words(valign_words(content, valign), halign, False)
-        return "".join(
-            (
-                "\\multicolumn{",
-                str(cols[1] - cols[0] + 1),
-                "}{|c|}{\\multirow{",
-                str(row_count),
-                "}*{\\parbox[c][][s]{",
-                str(round(self._multicol_width(cols), 2)),
-                "mm}{",
-                content,
-                "} } }",
-            )
+        curstyles = self.default_style.copy()
+        curstyles.update(styles)
+        return "\multicolumn{%d}{|c|}{\multirow{%d}*{\parbox[c][][c]{%smm}{%s}}}" % (
+            cols[1] - cols[0] + 1,
+            row_count,
+            round(self._multicol_width(cols), 2),
+            add_table_style(content, curstyles, False),
         )
 
-    def mr(self, content, col, row_count, halign="c", valign="c"):
-        content = halign_words(valign_words(content, valign), halign, False)
-        return "".join(
-            (
-                "\multirow{",
-                str(row_count),
-                "}*{\\parbox[c][][s]{",
-                str(round(self.innerwidth(col), 2)),
-                "mm}{",
-                content,
-                "} }",
-            )
+    def mr(self, content, col, row_count, **styles):
+        curstyles = self.default_style.copy()
+        curstyles.update(styles)
+        return "\multirow{%d}*{\parbox[c][][c]{%smm}{%s}}" % (
+            row_count,
+            round(self.innerwidth(col), 2),
+            add_table_style(content, curstyles, False),
         )
 

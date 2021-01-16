@@ -1,5 +1,10 @@
 {
     "col_lens": [3, 3, 3, 3, 4],
     "tabcolsep": 1,
-    "tablewidth": 0
+    "tablewidth": 0,
+    "default_style": {
+        "v": "c",
+        "h": "c",
+        "bf": false
+    }
 }
