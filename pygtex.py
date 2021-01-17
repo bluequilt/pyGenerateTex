@@ -1,7 +1,10 @@
 import subprocess
 from os import system
-from myenv import *
 from json import load as load_json
+
+#
+from myenv import *
+from tableenv import *
 
 template = latex_jinja_env.get_template("template.tex")
 
@@ -20,11 +23,14 @@ def generate():
     # ========建立总渲染参数，注入简单变量========
     render_dict = {}
     render_dict["geometry"] = geo
+    render_dict["intro_width"] = geo.textwidth * (9 / 16) - 4
+    render_dict["picbox_width"] = geo.textwidth * (7 / 16) - 4
+    render_dict["picbox_half_width"] = render_dict["picbox_width"] / 2 - 2
     render_dict.update(db_dict)
     # ========注入计算内容========
     tableenv = TableEnv(table_settings["check_table"])
     render_dict["check_table"] = {
-        "content": tableenv.get_table(db_dict["检查项目"], [{} for i in range(5)]),
+        "content": tableenv.get_table(db_dict["检查项目"]),
         "tabcolsep": tableenv.tabcolsep,
     }
     with open("pygtex.tex", "w", encoding="utf-8") as f:
