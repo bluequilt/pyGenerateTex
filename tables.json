@@ -1,0 +1,55 @@
+{
+    "check_table": {
+        "env": {
+            "tabcolsep": 1,
+            "tablewidth": 0,
+            "default_style": {
+                "v": "c",
+                "h": "l",
+                "bf": false
+            },
+            "head_style": {
+                "v": "c",
+                "h": "c",
+                "bf": true
+            }
+        },
+        "col_lens": [1, 7, 4, 2, 2],
+        "head": [
+            [{
+                "type": "mcr",
+                "content": "左上角大格",
+                "row_count": 2,
+                "bf": true
+
+            }, {
+                "type": "v"
+            }, {
+                "type": "cell",
+                "content": "第3列上标题",
+                "h": "l"
+            }, {
+                "type": "cell",
+                "content": "第4列上标题"
+            }, {
+                "type": "mr",
+                "content": "第5列标题",
+                "row_count": 2
+            }],
+            [{
+                "type": "mcrb"
+            }, {
+                "type": "vb"
+            }, {
+                "type": "cell",
+                "content": "第3列下标题",
+                "h": "r"
+            }, {
+                "type": "cell",
+                "content": "第4列下标题"
+            }, {
+                "type": "mrb"
+            }]
+        ]
+    }
+}

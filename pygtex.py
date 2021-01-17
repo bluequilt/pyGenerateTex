@@ -10,19 +10,23 @@ def generate():
     with open("geometry.json", "r", encoding="utf-8") as geometry_f:
         geometry_settings = load_json(geometry_f)
     geo = Geometry(geometry_settings)
-    # ========ddd========
-    with open("htable.json", "r", encoding="utf-8") as htable_f:
-        htable_settings = load_json(htable_f)
-    htable_settings["tablewidth"] = geo.textwidth
-    tableenv = TableEnv(htable_settings)
-    # ========ddd========
+    # ========读取表格设置========
+    with open("tables.json", "r", encoding="utf-8") as htable_f:
+        table_settings = load_json(htable_f)
+    table_settings["check_table"]["env"]["tablewidth"] = geo.textwidth - 4
+    # ========读取数据库========
     with open("db.json", "r", encoding="utf-8") as db_f:
         db_dict = load_json(db_f)
-    # ========ddd========
+    # ========建立总渲染参数，注入简单变量========
     render_dict = {}
     render_dict["geometry"] = geo
-    render_dict["htable"] = tableenv
     render_dict.update(db_dict)
+    # ========注入计算内容========
+    tableenv = TableEnv(table_settings["check_table"])
+    render_dict["check_table"] = {
+        "content": tableenv.get_table(db_dict["检查项目"], [{} for i in range(5)]),
+        "tabcolsep": tableenv.tabcolsep,
+    }
     with open("pygtex.tex", "w", encoding="utf-8") as f:
         f.write(template.render(render_dict))
 
